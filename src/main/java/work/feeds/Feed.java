@@ -7,5 +7,5 @@ package work.feeds;
 //synominous to encyrptionalgorithm
 public interface Feed {
 
-    public void process(FeedSource source);
+    void process(FeedSource source);
 }
