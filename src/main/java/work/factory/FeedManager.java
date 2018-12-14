@@ -1,45 +1,46 @@
-package work.feeds;
+package work.factory;
 
-import work.debatcher.FeedSource;
-import work.factory.FactoryInstatiator;
-import work.factory.FeedProcessor;
+import org.apache.commons.lang.Validate;
+import work.feeds.FeedSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 
 /**
+ *
  * Created by chris on 11/12/2018.
  */
 public class FeedManager {
-    private FeedSource source;
-    private FeedProcessor feedProcessor;
-    private String feedParam;
+    private final FeedSource source = new FeedSource("special");
+    private final FeedProcessor feedProcessor;
+    private final String feedParam; // Required
 
-    public FeedManager(String feedParam){
-        this.source = new FeedSource("special");
+    public FeedManager(String feedParam) throws IllegalArgumentException{
+        Validate.notNull(feedParam, "Feed Manager Cannot be supplied with Null");
         this.feedParam = feedParam;
-        this.feedProcessor = getInstance(feedParam);
+        this.feedProcessor = getInstance();
     }
 
     public void processFeed(){
         this.feedProcessor.startProcessing(source);
     }
 
-    public FeedProcessor getInstance(String feedParam){
+
+    private FeedProcessor getInstance(){
         try{
-            return getConcreateInstance(FactoryInstatiator.class, feedParam);
+            return getConcreateInstance(FactoryInstatiator.class, this.feedParam);
         }catch(InstantiationException | IllegalAccessException | IllegalArgumentException |
                 InvocationTargetException | NoSuchMethodException ex){
-            System.out.println(FeedManager.class.getName() + ex.getStackTrace());
+            System.out.println(MessageFormat.format("{0}{1}", FeedManager.class.getName(), ex.getStackTrace()));
         }
         throw new RuntimeException("Could not determine instance based on data");
     }
 
     private FeedProcessor getConcreateInstance(Class<FactoryInstatiator> factoryInstatiator, String feedParam) throws InstantiationException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException{
-        Class[] methodParameterTypes=null;
         Object instance = factoryInstatiator.newInstance();
-        Method method = factoryInstatiator.getDeclaredMethod(feedParam, methodParameterTypes);
+        Method method = factoryInstatiator.getDeclaredMethod(feedParam);
         return (FeedProcessor) method.invoke(instance);
     }
 }

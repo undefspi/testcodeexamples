@@ -1,6 +1,6 @@
 package work.factory;
 
-import work.debatcher.FeedSource;
+import work.feeds.FeedSource;
 import work.feeds.Feed;
 
 /**
